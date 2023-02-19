@@ -1,26 +1,105 @@
-const request = require('request');
-const cheerio = require('cheerio');
+const puppeteer = require("puppeteer");
+const fs = require("fs");
 
-const url = 'https://www.thaiwater.net/water/wl';
+// (async () => {
+//   const browser = await puppeteer.launch({ headless: false });
+//   const page = await browser.newPage();
+//   await page.goto("https://www.thaiwater.net/water/wl");
 
-request(url, (error, response, html) => {
-    if (!error && response.statusCode == 200) {
-        const $ = cheerio.load(html);
+//   let data = [];
 
-        const talent = $('div[class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4"] > div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-7 MuiGrid-grid-lg-8"] > div[class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2"] > div[class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-12 MuiGrid-grid-md-12 MuiGrid-grid-lg-12"] > div[class="MuiPaper-root MuiTableContainer-root MuiPaper-elevation1 MuiPaper-rounded"] > table[class="MuiTable-root jss1054 table-custom-sticky"] > tbody[class="MuiTableBody-root"] > tr[class="MuiTableRow-root jss2022"]').map((i, element) => {
-            // const nameJp = $(element).find('th[] > button > span[class="MuiButton-label"]').text().trim();
-            const test = $(element).find('td[class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"]').text().trim();
+//   let hasNextPage = true;
+//   let pageCounter = 1;
 
-            return {
-                // nameJp: nameJp,
-                test: test,
-            }
+//   while (hasNextPage) {
+//     // Extract the data from the table
+//       const pageData = await page.evaluate(() => {
+//         const rows = Array.from(
+//           document.querySelectorAll("#app table tbody tr")
+//         );
+//         return rows.map((row) => {
+//           const th = row.querySelectorAll("th");
+//           const columns = row.querySelectorAll("td");
+//           return {
+//             station: th[0].textContent.trim(),
+//             location: columns[0].textContent.trim().replace(/\s+/g, " "),
+//             basin: columns[1].textContent.trim(),
+//             province: columns[2].textContent.trim(),
+//             waterLevel: columns[3].textContent.trim(),
+//             status: columns[4].textContent.trim(),
+//             datetime: columns[6].textContent.trim(),
+//           };
+//         });
+//       });
+//       data = data.concat(pageData);
 
-        }).get()
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto("https://www.thaiwater.net/water/wl");
 
-        // const talentJson = JSON.stringify(talent);
+  let data = [];
 
-        console.log(talent);
+  let hasNextPage = true;
+  let pageCounter = 1;
+
+  while (hasNextPage) {
+    // Extract the data from the table
+    const pageData = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#app table tbody tr"));
+
+      return rows
+        .map((row) => {
+          const th = row.querySelectorAll("th");
+          const td = row.querySelectorAll("td");
+          const data = {
+            station: th[0]?.textContent?.trim() || "",
+            location: td[0]?.textContent?.trim().replace(/\s+/g, " ") || "",
+            basin: td[1]?.textContent?.trim() || "",
+            province: td[2]?.textContent?.trim() || "",
+            waterLevel: td[3]?.textContent?.trim() || "",
+            status: td[4]?.textContent?.trim() || "",
+            datetime: td[6]?.textContent?.trim() || "",
+          };
+          // Filter out objects where all properties are empty strings
+          if (Object.values(data).some((value) => value !== "")) {
+            return data;
+          }
+        })
+        .filter(Boolean); // Filter out any undefined objects
+    });
+
+    data = data.concat(pageData);
+
+    // Check if there is a next page
+    const nextButton = await page.$(
+      "#app > main > div > div > div > div:nth-child(4) > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-8 > div:nth-child(3) > div > div.MuiTablePagination-root > div > div > button:nth-child(3)"
+    );
+    hasNextPage = !(await page.evaluate(
+      (nextButton) => nextButton.disabled,
+      nextButton
+    ));
+
+    // if (!nextButton) {
+    //   console.log(`Reached the last page`);
+    //   break;
+    // }
+
+    // Click the next button and wait for the table to load again
+    await nextButton.click();
+    await page.waitForSelector("#app table tbody tr");
+    pageCounter++;
+    console.log(`Navigated to page ${pageCounter}`);
+  }
+
+  // Write data to a JSON file
+  fs.writeFile("data.json", JSON.stringify(data), (err) => {
+    if (err) {
+      console.error(err);
+      return;
     }
-});
+    console.log("Data written to file success.");
+  });
 
+  await browser.close();
+})();
