@@ -1,7 +1,14 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const app = express();
-const port = 3000;
+const port = 5000;
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 app.get('/', (req, res) => {
   res.send('Hello, World!')
@@ -19,7 +26,6 @@ app.get('/api/water', async (req, res) => {
     let pageCounter = 1;
 
     while (hasNextPage) {
-      // Extract the data from the table
       const pageData = await page.evaluate(() => {
         const rows = Array.from(document.querySelectorAll("#app table tbody tr"));
 
@@ -38,17 +44,15 @@ app.get('/api/water', async (req, res) => {
               trend: svg[0]?.innerHTML?.trim() || "",
               datetime: td[6]?.textContent?.trim() || "",
             };
-            // Filter out objects where all properties are empty strings
             if (Object.values(data).some((value) => value !== "")) {
               return data;
             }
           })
-          .filter(Boolean); // Filter out any undefined objects
+          .filter(Boolean);
       });
 
       data = data.concat(pageData);
 
-      // Check if there is a next page
       const nextButton = await page.$(
         "#app > main > div > div > div > div:nth-child(4) > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-8 > div:nth-child(3) > div > div.MuiTablePagination-root > div > div > button:nth-child(3)"
       );
@@ -57,7 +61,6 @@ app.get('/api/water', async (req, res) => {
         nextButton
       ));
 
-      // Click the next button and wait for the table to load again
       await nextButton.click();
       await page.waitForSelector("#app table tbody tr");
       pageCounter++;
