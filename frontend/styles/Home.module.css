@@ -1,0 +1,14 @@
+.tableright {
+  text-align: right !important;
+}
+
+.tablecenter {
+  text-align: center !important;
+}
+
+.main {
+  width: 1280px;
+  height: 100%;
+  margin: auto;
+  padding: 2rem;
+}
