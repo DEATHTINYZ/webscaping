@@ -9,7 +9,8 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "data.json",
+      "./data/waterLevelData.json",
+      "./data/reservoirData.json",
       "node_module"
     ]
   },
