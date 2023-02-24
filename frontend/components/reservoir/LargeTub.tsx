@@ -1,7 +1,17 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination
+} from '@material-ui/core';
 
 interface LargeTubData {
+  id: number;
   reservoir: string;
   capacity: string;
   amountOfWater: string;
@@ -12,10 +22,8 @@ interface LargeTubData {
 
 const LargeTub = () => {
   const [largeTubData, setLargeTubData] = useState<LargeTubData[] | null>(null);
-  console.log(
-    '🚀 ~ file: LargeTub.tsx:15 ~ LargeTub ~ largeTubData:',
-    largeTubData
-  );
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     async function fetchLargeTubData() {
@@ -27,37 +35,61 @@ const LargeTub = () => {
     fetchLargeTubData();
   }, []);
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   return (
-    <div>
-      <h2>Large Tub Data</h2>
-      {largeTubData ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Reservoir</th>
-              <th>Capacity</th>
-              <th>Amount of Water</th>
-              <th>Practical</th>
-              <th>Water Running Down</th>
-              <th>Drain Water</th>
-            </tr>
-          </thead>
-          <tbody>
-            {largeTubData.map((data) => (
-              <tr key={data.reservoir}>
-                <td>{data.reservoir}</td>
-                <td>{data.capacity}</td>
-                <td>{data.amountOfWater}</td>
-                <td>{data.practical}</td>
-                <td>{data.waterRunningdown}</td>
-                <td>{data.drainWater}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>Loading...</p>
-      )}
+    <div className="flex flex-col gap-[1rem]">
+      <div className="text-[24px] bg-[#1976d2] text-white p-[1rem] rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+        อ่างเก็บน้ำขนาดใหญ่
+      </div>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>อ่างเก็บน้ำ</TableCell>
+              <TableCell align="right">ความจุ</TableCell>
+              <TableCell align="right">ปริมาณน้ำ</TableCell>
+              <TableCell align="right">ใช้การได้จริง</TableCell>
+              <TableCell align="right">น้ำไหลลง</TableCell>
+              <TableCell align="right">น้ำระบาย</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {largeTubData &&
+              largeTubData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map(data => (
+                  <TableRow key={data.id}>
+                    <TableCell component="th" scope="row">
+                      {data.reservoir}
+                    </TableCell>
+                    <TableCell align="right">{data.capacity}</TableCell>
+                    <TableCell align="right">{data.amountOfWater}</TableCell>
+                    <TableCell align="right">{data.practical}</TableCell>
+                    <TableCell align="right">{data.waterRunningdown}</TableCell>
+                    <TableCell align="right">{data.drainWater}</TableCell>
+                  </TableRow>
+                ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+          rowsPerPageOptions={[10, 50, 100]}
+          component="div"
+          count={largeTubData ? largeTubData.length : 0}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </TableContainer>
     </div>
   );
 };
