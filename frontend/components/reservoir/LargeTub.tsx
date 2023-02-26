@@ -45,7 +45,7 @@ const LargeTub = () => {
         const data = await res.json();
         setLargeTubData(data.largeTub);
         setIsLoading(false);
-      }, 2000);
+      }, 1000);
     }
 
     fetchLargeTubData();

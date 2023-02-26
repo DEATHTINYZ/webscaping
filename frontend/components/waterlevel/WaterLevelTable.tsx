@@ -48,7 +48,7 @@ const WaterLevelTable = () => {
         const data = await res.json();
         setWaterData(data);
         setIsLoading(false);
-      }, 2000);
+      }, 1000);
     }
 
     fetchWaterData();
