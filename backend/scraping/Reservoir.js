@@ -7,7 +7,7 @@ async function reservoirData() {
     const page = await browser.newPage();
     await page.goto('https://www.thaiwater.net/water');
 
-    let data = {
+    let largeTubData = {
       largeTub: [],
     };
 
@@ -15,7 +15,7 @@ async function reservoirData() {
     let pageCounter = 1;
 
     while (hasNextPage) {
-      const pageData = await page.evaluate(() => {
+      const largePageData = await page.evaluate(() => {
         const rows = Array.from(
           document.querySelectorAll('#app table tbody tr')
         );
@@ -39,16 +39,22 @@ async function reservoirData() {
           .filter(Boolean);
       });
 
-      data.largeTub = data.largeTub.concat(pageData);
+      largeTubData.largeTub = largeTubData.largeTub.concat(largePageData);
 
       const nextButton = await page.$(
-        '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss1703 > div > div.jss2068 > button:nth-child(3)'
+        '#app > main > div > div.jss972 > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss1707 > div > div.jss2072 > button:nth-child(3)'
       );
 
-      hasNextPage = !(await page.evaluate(
-        (nextButton) => nextButton.disabled,
-        nextButton
-      ));
+      if (!nextButton) {
+        hasNextPage = false;
+      }
+      
+      if (hasNextPage) {
+        hasNextPage = !(await page.evaluate(
+          (nextButton) => nextButton.disabled,
+          nextButton
+        ));
+      }
 
       if (!hasNextPage) {
         const nextTableButton = await page.$(
@@ -58,14 +64,14 @@ async function reservoirData() {
 
         await page.waitForSelector('#app table tbody tr');
 
-        let data2 = {
-          mediumSizeTub: [],
+        let mediumTubData = {
+          mediumTub: [],
         };
         hasNextPage = true;
         pageCounter = 1;
 
         while (hasNextPage) {
-          const pageData2 = await page.evaluate(() => {
+          const mediumPageData = await page.evaluate(() => {
             const rows = Array.from(
               document.querySelectorAll('#app table tbody tr')
             );
@@ -89,10 +95,10 @@ async function reservoirData() {
               .filter(Boolean);
           });
 
-          data2.mediumSizeTub = data2.mediumSizeTub.concat(pageData2);
+          mediumTubData.mediumTub = mediumTubData.mediumTub.concat(mediumPageData);
 
           const nextButton2 = await page.$(
-            '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss2460 > div > div.jss2068 > button:nth-child(3)'
+            '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss2426 > div > div.jss2068 > button:nth-child(3)'
           );
 
           hasNextPage = !(await page.evaluate(
@@ -101,7 +107,6 @@ async function reservoirData() {
           ));
 
           if (!nextButton2) {
-            console.log(`Reached the last page`);
             break;
           }
 
@@ -112,12 +117,15 @@ async function reservoirData() {
 
         await browser.close();
 
-        const combinedData = { ...data, ...data2 };
+        const combinedData = { ...largeTubData, ...mediumTubData };
 
-        const duplicateData = Object.entries(combinedData).reduce((acc, [key, arr]) => {
-            acc[key] = arr.filter(obj => !obj.reservoir.includes("รวม"));
+        const duplicateData = Object.entries(combinedData).reduce(
+          (acc, [key, arr]) => {
+            acc[key] = arr.filter((obj) => !obj.reservoir.includes('รวม'));
             return acc;
-          }, {});
+          },
+          {}
+        );
 
         fs.writeFile(
           './data/reservoirData.json',
@@ -131,7 +139,7 @@ async function reservoirData() {
         );
       }
 
-      await nextButton.click();
+      await nextButton?.click();
       await page.waitForSelector('#app table tbody tr');
       pageCounter++;
     }
@@ -144,7 +152,6 @@ async function reservoirData() {
     });
   } catch (error) {
     if (error.message.includes('Session closed')) {
-      console.log('Webpage closed or terminated.');
     } else {
       console.error(error);
     }

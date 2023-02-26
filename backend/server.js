@@ -1,6 +1,6 @@
+const fs = require('fs');
 const cron = require('node-cron');
 const express = require('express');
-const fs = require('fs');
 const waterLevelData = require('./scraping/WaterLevel');
 const reservoirData = require('./scraping/Reservoir');
 
@@ -14,40 +14,55 @@ app.use((req, res, next) => {
   next();
 });
 
-cron.schedule('*/15 * * * *', () => {
-  waterLevelData();
-  reservoirData();
+cron.schedule('*/15 * * * *', async () => {
+  try {
+    await waterLevelData();
+    await reservoirData();
+  } catch (error) {
+    console.error(error);
+  }
 });
 
-waterLevelData();
-reservoirData();
+Promise.all([waterLevelData(), reservoirData()]).then(() => {
+  app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+  });
+}).catch(error => {
+  console.error(error);
+  process.exit(1);
+});
+
+let waterLevelCache = null;
+let reservoirCache = null;
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
 app.get('/api/waterlevel', async (req, res) => {
-  try {
-    const rawData = fs.readFileSync('./data/waterLevelData.json');
-    const data = JSON.parse(rawData);
-    res.send(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  if (!waterLevelCache) {
+    try {
+      const rawData = await fs.promises.readFile('./data/waterLevelData.json');
+      waterLevelCache = JSON.parse(rawData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+      return;
+    }
   }
+  res.send(waterLevelCache);
 });
 
 app.get('/api/reservoir', async (req, res) => {
-  try {
-    const rawData = fs.readFileSync('./data/reservoirData.json');
-    const data = JSON.parse(rawData);
-    res.send(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  if (!reservoirCache) {
+    try {
+      const rawData = await fs.promises.readFile('./data/reservoirData.json');
+      reservoirCache = JSON.parse(rawData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+      return;
+    }
   }
-});
-
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+  res.send(reservoirCache);
 });
