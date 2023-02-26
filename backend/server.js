@@ -32,37 +32,28 @@ Promise.all([waterLevelData(), reservoirData()]).then(() => {
   process.exit(1);
 });
 
-let waterLevelCache = null;
-let reservoirCache = null;
-
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
 app.get('/api/waterlevel', async (req, res) => {
-  if (!waterLevelCache) {
-    try {
-      const rawData = await fs.promises.readFile('./data/waterLevelData.json');
-      waterLevelCache = JSON.parse(rawData);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal server error');
-      return;
-    }
+  try {
+    const rawData = fs.readFileSync('./data/waterLevelData.json');
+    const data = JSON.parse(rawData);
+    res.send(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
   }
-  res.send(waterLevelCache);
 });
 
 app.get('/api/reservoir', async (req, res) => {
-  if (!reservoirCache) {
-    try {
-      const rawData = await fs.promises.readFile('./data/reservoirData.json');
-      reservoirCache = JSON.parse(rawData);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal server error');
-      return;
-    }
+  try {
+    const rawData = fs.readFileSync('./data/reservoirData.json');
+    const data = JSON.parse(rawData);
+    res.send(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
   }
-  res.send(reservoirCache);
 });
