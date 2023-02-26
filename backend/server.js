@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const express = require('express');
 const waterLevelData = require('./scraping/WaterLevel');
 const reservoirData = require('./scraping/Reservoir');
+const waterLevelJson = require('./data/waterLevelData.json')
 
 const app = express();
 const port = 5000;
@@ -33,7 +34,7 @@ Promise.all([waterLevelData(), reservoirData()]).then(() => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.json(waterLevelJson)
 });
 
 app.get('/api/waterlevel', async (req, res) => {
