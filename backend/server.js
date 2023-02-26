@@ -8,52 +8,72 @@ const reservoirData = require('./scraping/Reservoir');
 const app = express();
 const port = 5000;
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://waterdata-table.vercel.app");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+app.use(function (req, res, next) {
+  res.header(
+    'Access-Control-Allow-Origin',
+    'https://waterdata-table.vercel.app'
+  );
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
   next();
 });
 
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/1 * * * *', async () => {
   try {
     await waterLevelData();
     await reservoirData();
+    console.log('scraping every 15 mins');
   } catch (error) {
     console.error(error);
   }
 });
 
-Promise.all([waterLevelData(), reservoirData()]).then(() => {
-  app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+Promise.all([waterLevelData(), reservoirData()])
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server listening at http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
   });
-}).catch(error => {
-  console.error(error);
-  process.exit(1);
-});
+
+let waterLevelCache = null;
+let reservoirCache = null;
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World!');
 });
 
 app.get('/api/waterlevel', async (req, res) => {
-  try {
-    const rawData = fs.readFileSync(path.join(__dirname, 'data/waterLevelData.json'));
-    const data = JSON.parse(rawData);
-    res.send(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  if (!waterLevelCache) {
+    try {
+      const rawData = fs.readFileSync(
+        path.join(__dirname, 'data/waterLevelData.json')
+      );
+      waterLevelCache = JSON.parse(rawData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+      return;
+    }
   }
 });
 
 app.get('/api/reservoir', async (req, res) => {
-  try {
-    const rawData = fs.readFileSync(path.join(__dirname, 'data/reservoirData.json'));
-    const data = JSON.parse(rawData);
-    res.send(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  if (!reservoirCache) {
+    try {
+      const rawData = fs.readFileSync(
+        path.join(__dirname, 'data/reservoirData.json')
+      );
+      reservoirCache = JSON.parse(rawData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+      return;
+    }
   }
 });
