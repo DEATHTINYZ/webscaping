@@ -61,6 +61,7 @@ app.get('/api/waterlevel', async (req, res) => {
       return;
     }
   }
+  res.send(waterLevelCache);
 });
 
 app.get('/api/reservoir', async (req, res) => {
@@ -76,4 +77,5 @@ app.get('/api/reservoir', async (req, res) => {
       return;
     }
   }
+  res.send(reservoirCache);
 });
