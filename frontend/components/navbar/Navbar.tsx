@@ -3,18 +3,13 @@ import Link from 'next/link';
 import React from 'react';
 
 interface NavItemType {
-  items: Item[];
-}
-
-interface Item {
   to: string;
   name: string;
   icon: string;
 }
 
 const Navbar = () => {
-  const headerData: NavItemType = {
-    items: [
+  const headerData: NavItemType[] = [
       {
         to: '/',
         name: 'อ่างเก็บน้ำ',
@@ -26,14 +21,12 @@ const Navbar = () => {
         icon: '/assets/icon-waterlevel.svg'
       }
     ]
-  };
-  const { items } = headerData;
 
   return (
     <header className="h-[90px] mt-[2rem]">
       <nav className="container w-fit border-[1px] border-[#ced4da] rounded-[12px] shadow-[0_1px_2px_rgba(0,0,0,0.2)] overflow-hidden">
         <ul className="flex items-center justify-center">
-          {items.map((data, index) => {
+          {headerData.map((data, index) => {
             return (
               <Link href={data.to} key={index} passHref>
                 <div className="flex flex-col gap-[.5rem] items-center w-[100px] p-[1rem] hover:bg-[#ced4da]">
