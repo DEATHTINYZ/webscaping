@@ -1,9 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 const cron = require('node-cron');
 const express = require('express');
 const waterLevelData = require('./scraping/WaterLevel');
 const reservoirData = require('./scraping/Reservoir');
-const waterLevelJson = require('./data/waterLevelData.json')
+// const waterLevelJson = require('./data/waterLevelData.json')
 
 const app = express();
 const port = 5000;
@@ -34,18 +35,19 @@ Promise.all([waterLevelData(), reservoirData()]).then(() => {
 });
 
 app.get('/', (req, res) => {
-  res.json(waterLevelJson)
+  res.send('Hello World!')
 });
 
 app.get('/api/waterlevel', async (req, res) => {
   try {
-    const rawData = fs.readFileSync('./data/waterLevelData.json');
+    const rawData = fs.readFileSync(path.join(__dirname, 'data/waterLevelData.json'));
     const data = JSON.parse(rawData);
     res.send(data);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');
   }
+  // res.json(waterLevelJson)
 });
 
 app.get('/api/reservoir', async (req, res) => {
