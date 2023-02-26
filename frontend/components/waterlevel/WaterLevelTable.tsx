@@ -44,7 +44,7 @@ const WaterLevelTable = () => {
     async function fetchWaterData() {
       setIsLoading(true);
       setTimeout(async () => {
-        const res = await fetch('http://localhost:5000/api/waterlevel');
+        const res = await fetch('https://waterapi.vercel.app/api/waterlevel');
         const data = await res.json();
         setWaterData(data);
         setIsLoading(false);

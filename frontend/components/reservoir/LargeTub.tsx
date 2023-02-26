@@ -41,7 +41,7 @@ const LargeTub = () => {
     async function fetchLargeTubData() {
       setIsLoading(true);
       setTimeout(async () => {
-        const res = await fetch('http://localhost:5000/api/reservoir');
+        const res = await fetch('https://waterapi.vercel.app/api/reservoir');
         const data = await res.json();
         setLargeTubData(data.largeTub);
         setIsLoading(false);
