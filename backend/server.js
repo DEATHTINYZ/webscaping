@@ -4,7 +4,6 @@ const cron = require('node-cron');
 const express = require('express');
 const waterLevelData = require('./scraping/WaterLevel');
 const reservoirData = require('./scraping/Reservoir');
-// const waterLevelJson = require('./data/waterLevelData.json')
 
 const app = express();
 const port = 5000;
@@ -47,12 +46,11 @@ app.get('/api/waterlevel', async (req, res) => {
     console.error(error);
     res.status(500).send('Internal server error');
   }
-  // res.json(waterLevelJson)
 });
 
 app.get('/api/reservoir', async (req, res) => {
   try {
-    const rawData = fs.readFileSync('./data/reservoirData.json');
+    const rawData = fs.readFileSync(path.join(__dirname, 'data/reservoirData.json'));
     const data = JSON.parse(rawData);
     res.send(data);
   } catch (error) {
