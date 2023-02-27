@@ -20,11 +20,15 @@ app.use(function (req, res, next) {
   next();
 });
 
+let waterLevelCache = null;
+let reservoirCache = null;
+
 cron.schedule('*/1 * * * *', async () => {
   try {
     await waterLevelData();
     await reservoirData();
-    console.log('scraping every 15 mins');
+    waterLevelCache = null;
+    reservoirCache = null;
   } catch (error) {
     console.error(error);
   }
@@ -40,9 +44,6 @@ Promise.all([waterLevelData(), reservoirData()])
     console.error(error);
     process.exit(1);
   });
-
-let waterLevelCache = null;
-let reservoirCache = null;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
