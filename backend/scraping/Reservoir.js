@@ -42,7 +42,7 @@ async function reservoirData() {
       largeTubData.largeTub = largeTubData.largeTub.concat(largePageData);
 
       const nextButton = await page.$(
-        '#app > main > div > div.jss972 > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss1707 > div > div.jss2072 > button:nth-child(3)'
+        '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root > div > div > button:nth-child(3)'
       );
 
       if (!nextButton) {
@@ -98,7 +98,7 @@ async function reservoirData() {
           mediumTubData.mediumTub = mediumTubData.mediumTub.concat(mediumPageData);
 
           const nextButton2 = await page.$(
-            '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root.jss2426 > div > div.jss2068 > button:nth-child(3)'
+            '#app > main > div > div > div:nth-child(4) > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-7.MuiGrid-grid-lg-7 > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-12.MuiGrid-grid-md-12.MuiGrid-grid-lg-12 > div.MuiPaper-root.MuiPaper-elevation1.MuiPaper-rounded > div > div.MuiTypography-root.MuiTypography-body1 > div.MuiTablePagination-root > div > div > button:nth-child(3)'
           );
 
           hasNextPage = !(await page.evaluate(

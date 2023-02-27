@@ -23,7 +23,7 @@ app.use(function (req, res, next) {
 let waterLevelCache = null;
 let reservoirCache = null;
 
-cron.schedule('*/1 * * * *', async () => {
+cron.schedule('*/15 * * * *', async () => {
   try {
     await waterLevelData();
     await reservoirData();
