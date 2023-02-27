@@ -24,8 +24,7 @@ cron.schedule('*/1 * * * *', async () => {
   try {
     await waterLevelData();
     await reservoirData();
-    let waterLevelCache = null;
-    let reservoirCache = null;
+    console.log('scraping every 15 mins');
   } catch (error) {
     console.error(error);
   }
@@ -41,6 +40,9 @@ Promise.all([waterLevelData(), reservoirData()])
     console.error(error);
     process.exit(1);
   });
+
+let waterLevelCache = null;
+let reservoirCache = null;
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
